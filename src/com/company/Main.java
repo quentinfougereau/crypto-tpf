@@ -14,7 +14,7 @@ import java.security.NoSuchAlgorithmException;
 public class Main {
 
     public static void main(String[] args) {
-	// write your code here
+
         byte[] clefBrute = {
                 (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
                 (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
@@ -47,17 +47,7 @@ public class Main {
             fis.close();
             cis.close();
 
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (NoSuchPaddingException e) {
-            e.printStackTrace();
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        } catch (InvalidAlgorithmParameterException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException | IOException | InvalidKeyException | NoSuchPaddingException e) {
             e.printStackTrace();
         }
     }
