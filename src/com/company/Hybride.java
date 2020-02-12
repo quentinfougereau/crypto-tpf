@@ -4,8 +4,11 @@ import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
+import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPrivateKeySpec;
 import java.util.*;
 
 public class Hybride {
@@ -50,12 +53,6 @@ public class Hybride {
             addValidKey(decryptedFilePKCS1);
             addValidKey(decryptedFileSHA1);
             addValidKey(decryptedFileSHA256);
-            /*
-            dechiffrement("RSA/ECB/PKCS1Padding", cryptedFile, privateKey);
-            dechiffrement("RSA/ECB/OAEPWithSHA-1AndMGF1Padding", cryptedFile, privateKey);
-            dechiffrement("RSA/ECB/OAEPWithSHA-256AndMGF1Padding", cryptedFile, privateKey);
-            
-             */
 
         }
 
@@ -90,7 +87,7 @@ public class Hybride {
             fis.close();
             cis.close();
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IOException | InvalidAlgorithmParameterException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         }
         return outputStream.toByteArray();
     }
@@ -105,89 +102,10 @@ public class Hybride {
         return (key.length == 16 || key.length ==  24 || key.length == 32);  // Seules les clés de session de 16, 24 ou 32 octets sont valides en AES
     }
 
-    public void dechiffrement(String methode, String fichierChiffré, PrivateKey clefPrivee, String alias) {
-        Cipher chiffreur = null;
-        byte[] buffer = new byte[1024];
-        byte[] res = new byte[1];
-        int nbOctetsLus;
-        try {
-            chiffreur = Cipher.getInstance(methode);
-            chiffreur.init(Cipher.DECRYPT_MODE, clefPrivee);
-            FileInputStream fis = new FileInputStream(fichierChiffré);
-            CipherInputStream cis = new CipherInputStream(fis, chiffreur);
-
-            while ( ( nbOctetsLus = cis.read(buffer) ) != -1 ) {
-                if (nbOctetsLus == 16 || nbOctetsLus == 24 || nbOctetsLus == 32) {
-                    res = new byte[nbOctetsLus];
-                    for (int i = 0; i < nbOctetsLus; i++) {
-                        res[i] = buffer[i];
-                    }
-                }
-            }
-
-            fis.close();
-            cis.close();
-
-            if (res.length == 16 || res.length == 24 || res.length == 32) {
-                System.out.println("Bourrage : " + methode);
-                System.out.println(alias);
-                printBytes(res);
-                System.out.println("LENGTH = " + res.length);
-                //validKeys.add(res);
-            }
-
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            //e.printStackTrace();
-        }
-    }
-
-    public void dechiffrementFichier(String methode, byte[] clefBrute, String fichierChiffré) {
-        Cipher chiffreur = null;
-        byte[] iv = new byte[16];
-        byte[] buffer = new byte[1024];
-        int nbOctetsLus;
-        SecretKeySpec clefPrivee = new SecretKeySpec(clefBrute, "AES");
-        try {
-            FileInputStream fis = new FileInputStream(fichierChiffré);
-
-            fis.read(iv);
-            IvParameterSpec ivSpec = new IvParameterSpec(iv);
-
-            chiffreur = Cipher.getInstance(methode);
-            chiffreur.init(Cipher.DECRYPT_MODE, clefPrivee, ivSpec);
-
-            CipherInputStream cis = new CipherInputStream(fis, chiffreur);
-            FileOutputStream fos = new FileOutputStream("./src/Exercices/F.2_et_F.3/mystereDechiffre.pdf");
-
-            while ((nbOctetsLus = cis.read(buffer)) != -1) {
-                fos.write(buffer, 0, nbOctetsLus);
-            }
-
-            fis.close();
-            cis.close();
-        } catch (NoSuchPaddingException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        } catch (InvalidAlgorithmParameterException e) {
-            e.printStackTrace();
-        }
-    }
-
     public void writeBytesToFile(byte[] bytes, String output) {
         FileOutputStream fos = null;
         try {
-            fos = new FileOutputStream("./src/Exercices/F.2_et_F.3/mystereDechiffre.pdf");
+            fos = new FileOutputStream(output);
             fos.write(bytes, 0, bytes.length);
         } catch (IOException e) {
             e.printStackTrace();
@@ -203,17 +121,63 @@ public class Hybride {
 
     public static void main(String[] args) {
         Hybride hybride = new Hybride();
+        /*
         hybride.findValidKeys();
-
-        //hybride.dechiffrementFichier("AES/CBC/PKCS5Padding", hybride.bonnesClefs.get(0), "./src/Exercices/F.2_et_F.3/mystere");
-
-        //Bonne méthode : AES/CBC/PKCS5Padding
-        //hybride.dechiffrementFichier("AES/CBC/PKCS5Padding", hybride.validKeys.get(1), "./src/Exercices/F.2_et_F.3/mystere");
         Key privateKey = new SecretKeySpec(hybride.validKeys.get(1), "AES");
+         */
+
+        /*
+        //Bonne méthode : AES/CBC/PKCS5Padding
         byte[] decryptedFile = hybride.decryptFile("AES", "CBC", "PKCS5Padding", privateKey, CRYPTED_FILE, true);
         System.out.println("LENGTH : " + decryptedFile.length);
         hybride.writeBytesToFile(decryptedFile, "./src/Exercices/F.2_et_F.3/mystereDechiffre.pdf");
+         */
 
+        byte key[] = {
+                (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00,
+                (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00
+        };
+        Key privateKey2 = new SecretKeySpec(key, "AES");
+        // Exercice F.4
+        /*
+        String cbcSecret = "./src/Exercices/F.4/cbc-secret.jpg";
+        byte[] decryptedFile2 = hybride.decryptFile("AES", "CBC", "PKCS5Padding", privateKey2, cbcSecret, true);
+        hybride.writeBytesToFile(decryptedFile2, "./src/Exercices/F.4/butokuden_d.jpg");
+         */
+
+        // Exercice F.5
+        BigInteger d = new BigInteger(
+                "35c854adf9eadbc0d6cb47c4d11f9c"+
+                        "b1cbc2dbdd99f2337cbeb2015b1124"+
+                        "f224a5294d289babfe6b483cc253fa"+
+                        "de00ba57aeaec6363bc7175fed20fe"+
+                        "fd4ca4565e0f185ca684bb72c12746"+
+                        "96079cded2e006d577cad2458a5015"+
+                        "0c18a32f343051e8023b8cedd49598"+
+                        "73abef69574dc9049a18821e606b0d"+
+                        "0d611894eb434a59", 16);
+        BigInteger n = new BigInteger(
+                "00af7958cb96d7af4c2e6448089362"+
+                        "31cc56e011f340c730b582a7704e55"+
+                        "9e3d797c2b697c4eec07ca5a903983"+
+                        "4c0566064d11121f1586829ef6900d"+
+                        "003ef414487ec492af7a12c34332e5"+
+                        "20fa7a0d79bf4566266bcf77c2e007"+
+                        "2a491dbafa7f93175aa9edbf3a7442"+
+                        "f83a75d78da5422baa4921e2e0df1c"+
+                        "50d6ab2ae44140af2b", 16);
+        BigInteger e = BigInteger.valueOf(0x10001);
+        Key privateKey3 = null;
+        try {
+            KeyFactory usineAClefs = KeyFactory.getInstance("RSA");
+            RSAPrivateKeySpec specPriv = new RSAPrivateKeySpec(n, d);
+            privateKey3 = usineAClefs.generatePrivate(specPriv);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
+            ex.printStackTrace();
+        }
+        String chiffre_OAEP_SHA1 = "./src/Exercices/F.5/message_chiffre_OAEP_SHA1.bin";
+        byte[] decryptedFile3 = hybride.decryptFile("RSA", "ECB", "OAEPWithSHA-1AndMGF1Padding", privateKey3, chiffre_OAEP_SHA1, false);
+        hybride.writeBytesToFile(decryptedFile3, "./src/Exercices/F.5/message_dechiffre_OAEP_SHA1.txt");
     }
 
 }
